@@ -6,14 +6,22 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import pytest
+import requests
 from unittestzero import Assert
 
 from pages.home import HomePage
 from pages.community import CommunityPage
-from pages.link_crawler import LinkCrawler
 
 
 class TestCommunityPage:
+
+    link_check_url = '/community'
+    link_check_locator = '#content a[href*="mozilla.org"]'
+
+    @pytest.mark.nondestructive
+    @pytest.mark.skip_selenium
+    def test_community_page_links(self, link):
+        Assert.equal(requests.get(link, verify=False).status_code, requests.codes.ok)
 
     @pytest.mark.nondestructive
     def test_community_title(self, mozwebqa):
@@ -39,23 +47,3 @@ class TestCommunityPage:
 
         for article in found_articles:
             Assert.contains(tag_name, article.related_tags)
-
-    @pytest.mark.nondestructive
-    @pytest.mark.skip_selenium
-    def test_community_page_links(self, mozwebqa):
-        crawler = LinkCrawler(mozwebqa)
-        urls = crawler.collect_links('/community', id='activity-stream')
-        bad_urls = []
-
-        Assert.greater(
-            len(urls), 0, u'something went wrong. no links found.')
-
-        for url in urls:
-            if not 'irc://irc.mozilla.org' in url:
-                check_result = crawler.verify_status_code_is_ok(url)
-                if check_result is not True:
-                    bad_urls.append(check_result)
-
-        Assert.equal(
-            0, len(bad_urls),
-            u'%s bad links found. ' % len(bad_urls) + ', '.join(bad_urls))

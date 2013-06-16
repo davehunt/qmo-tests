@@ -5,12 +5,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import pytest
+import requests
 from unittestzero import Assert
 
 from pages.home import HomePage
 
 
 class TestMediaPage:
+
+    link_check_url = '/media'
+    link_check_locator = '#content-main a'
+
+    @pytest.mark.nondestructive
+    @pytest.mark.skip_selenium
+    def test_media_page_links(self, link):
+        Assert.equal(requests.get(link, verify=False).status_code, requests.codes.ok)
 
     @pytest.mark.nondestructive
     def test_media_title(self, mozwebqa):
